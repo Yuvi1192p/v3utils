@@ -59,6 +59,8 @@ contract AutoRange is Automator {
         uint128 liquidity; // liquidity the calculations are based on
         uint256 amountRemoveMin0; // min amount to be removed from liquidity
         uint256 amountRemoveMin1; // min amount to be removed from liquidity
+        uint256 amountAddMin0; // min amount to be added when minting new position
+        uint256 amountAddMin1; // min amount to be added when minting new position
         uint256 deadline; // for uniswap operations - operator promises fair value
         uint64 rewardX64;  // which reward will be used for protocol, can be max configured amount (considering onlyFees)
     }
@@ -174,8 +176,8 @@ contract AutoRange is Automator {
                     SafeCast.toInt24(baseTick + config.upperTickDelta), // reverts if out of valid range
                     state.maxAddAmount0,
                     state.maxAddAmount1,
-                    0,
-                    0,
+                    params.amountAddMin0,
+                    params.amountAddMin1,
                     address(this), // is sent to real recipient aftwards
                     params.deadline
                 );
