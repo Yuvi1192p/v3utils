@@ -290,13 +290,15 @@ abstract contract Automator is Ownable {
         feeAmount1 = amount1 - feeAmount1;
     }
 
-    // transfers token (or unwraps WETH and sends ETH)
+    // transfers token (or unwraps WETH and sends ETH, with WETH fallback on failure)
     function _transferToken(address to, IERC20 token, uint256 amount, bool unwrap) internal {
         if (address(weth) == address(token) && unwrap) {
             weth.withdraw(amount);
             (bool sent, ) = to.call{value: amount}("");
             if (!sent) {
-                revert EtherSendFailed();
+                // Fallback: re-wrap to WETH and transfer standard ERC-20 to avoid DoS on smart contract owners
+                weth.deposit{value: amount}();
+                SafeERC20.safeTransfer(token, to, amount);
             }
         } else {
             SafeERC20.safeTransfer(token, to, amount);
